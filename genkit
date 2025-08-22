@@ -1,0 +1,18 @@
+import { createGenkitTools } from '@agentic/genkit'
+import { AgenticToolClient } from '@agentic/platform-tool-client'
+import { genkit } from 'genkit'
+import { gpt4oMini, openAI } from 'genkitx-openai'
+
+const searchTool = await AgenticToolClient.fromIdentifier('@agentic/search')
+
+const ai = genkit({
+  plugins: [openAI()]
+})
+
+const result = await ai.generate({
+  model: gpt4oMini,
+  tools: createGenkitTools(ai, searchTool),
+  prompt: 'What is the latest news about AI?'
+})
+
+console.log(result)
