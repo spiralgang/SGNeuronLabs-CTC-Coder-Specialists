@@ -1,0 +1,18 @@
+from openai import OpenAI
+
+client = OpenAI()
+
+response = client.responses.create(
+    model="gpt-4.1",
+    tools=[
+        {
+            "type": "mcp",
+            "server_label": "@agentic/search",
+            "server_url": "https://gateway.agentic.so/@agentic/search/mcp",
+            "require_approval": "never",
+        },
+    ],
+    input="What is the latest news about AI?",
+)
+
+print(response.output_text)
