@@ -1,0 +1,38 @@
+## Open sidebar
+
+---
+
+# Qualcomm® AI Hub
+
+### Deploy optimized models on real devices in minutes
+
+**What is Qualcomm® AI Hub?**  
+Qualcomm® AI Hub streamlines deploying AI models for vision, audio, and speech applications to edge devices. Optimize, validate, and deploy models on hosted Qualcomm® platforms in minutes.  
+- **Automatic Model Optimization:** Convert PyTorch or ONNX models for efficient on-device deployment using TensorFlow Lite, ONNX Runtime, or Qualcomm AI Runtime—targeting CPU, GPU, or NPU.
+- **Model Library:** Access 100+ open-source, pre-optimized models for vision, speech, audio, and text—deployable on Snapdragon® and Qualcomm®-powered devices. Recipes available on [GitHub](https://github.com/quic/ai-hub-models) and [Hugging Face](https://huggingface.co/Qualcomm-AI-Hub).
+- **Real Device Testing:** Instantly provision hosted Qualcomm® platform devices for on-device inference and profiling with minimal code.
+
+### Installation
+
+We recommend [Miniconda](https://docs.conda.io/en/latest/miniconda.html) to manage Python environments.  
+Compatible Python: >= 3.9, <= 3.11
+
+```sh
+pip3 install qai-hub
+```
+
+**Sign in and configure:**
+1. Obtain your API token from [Qualcomm AI Hub](https://aihub.qualcomm.com/) (Account → Settings → API Token).
+2. Configure your client:
+   ```sh
+   qai-hub configure --api_token API_TOKEN
+   ```
+3. Verify your setup:
+   ```sh
+   qai-hub list-devices
+   ```
+
+**References**  
+- Vault: /reference (AI Hub, Python packaging, documentation structure)
+- [Qualcomm AI Hub Docs](https://aihub.qualcomm.com/docs)
+- [Qualcomm AI Hub GitHub](https://github.com/quic/ai-hub-models)
