@@ -1,0 +1,39 @@
+name: Bootstrap & Extract Zips
+
+on:
+  workflow_dispatch:  # Allow manual trigger
+  push:
+    branches: [main]
+
+jobs:
+  extract-and-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies (if needed)
+        run: python3 -m pip install --upgrade pip
+
+      - name: Extract all repo zips
+        run: |
+          python3 tools/extract_all_zips.py
+
+      # Optional: Run further setup/audit scripts
+      # - name: Check environment
+      #   run: python3 tools/check_env.py
+
+      - name: Upload extracted files as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: extracted-repo
+          path: .
+
+      # Optional: Post results to Jira via API/webhook (see below)
+
+# References: Vault: /reference (GitHub Actions, CI/CD, Python, auditability)
