@@ -1,0 +1,92 @@
+import ai.z.openapi.ZhipuAiClient;
+
+public class QuickStart {
+    public static void main(String[] args) {
+        // 从环境变量读取 API Key
+        ZhipuAiClient client = ZhipuAiClient.builder()
+            .apiKey(System.getenv("ZAI_API_KEY"))
+            .build();
+        
+        // 或者直接使用（如果已设置环境变量）
+        ZhipuAiClient client2 = ZhipuAiClient.builder().build();
+    }
+}import ai.z.openapi.ZhipuAiClient;
+import ai.z.openapi.service.model.*;
+import ai.z.openapi.core.Constants;
+import java.util.Arrays;
+
+public class BasicChat {
+    public static void main(String[] args) {
+        // 初始化客户端
+        ZhipuAiClient client = ZhipuAiClient.builder()
+            .apiKey("YOUR_API_KEY")
+            .build();
+        
+        // 创建聊天完成请求
+        ChatCompletionCreateParams request = ChatCompletionCreateParams.builder()
+            .model(Constants.ModelChatGLM4_5)
+            .messages(Arrays.asList(
+                ChatMessage.builder()
+                    .role(ChatMessageRole.USER.value())
+                    .content("你好，请介绍一下自己")
+                    .build()
+            ))
+            .build();
+        
+        // 发送请求
+        ChatCompletionResponse response = client.chat().createChatCompletion(request);
+        
+        // 获取回复
+        if (response.isSuccess()) {
+            Object reply = response.getData().getChoices().get(0).getMessage();
+            System.out.println("AI回复: " + reply);
+        } else {
+            System.err.println("错误: " + response.getMsg());
+        }
+    }
+}
+
+    if (isUnexpected(response)) {
+        throw response.body.error;
+    }
+    console.log(response.body.choices[0].message.content);
+}
+
+main().catch((err) => {
+    console.error("The sample encountered an error:", err);
+});
+el": "glm-4.5",
+    "messages": [
+        {
+            "type": "text",
+            "text": "帮我查询从2024年1月20日，从北京出发前往上海的航班"
+        }
+    ],
+    "tools": [
+        {
+            "type": "function",
+            "function": {
+                "name": "get_flight_number",
+                "description": "根据始发地、目的地和日期，查询对应日期的航班号",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "departure": {
+                            "description": "出发地",
+                            "type": "string"
+                        },
+                        "destination": {
+                            "description": "目的地",
+                            "type": "string"
+                        },
+                        "date": {
+                            "description": "日期",
+                            "type": "string"
+                        }
+                    },
+                    "required": ["departure", "destination", "date"]
+                }
+            }
+        }
+    ]
+}
