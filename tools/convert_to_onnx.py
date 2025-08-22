@@ -1,6 +1,6 @@
 """
 Convert a PyTorch model checkpoint to ONNX format.
-References: Vault: /reference (PyTorch, ONNX, model export best practices)
+References: Vault: /reference (PyTorch, ONNX export, mobile Python best practices)
 """
 import torch, argparse
 
@@ -20,4 +20,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
     export(args.model_path, args.output_path, tuple(args.input_shape))
 
-# References: Vault: /reference (PyTorch, ONNX export)
+# References: Vault: /reference (PyTorch, ONNX, mobile Python)
