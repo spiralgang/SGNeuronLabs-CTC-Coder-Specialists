@@ -1,4 +1,5 @@
-name: Bootstrap-and-Extract Cyberforge
+- name: Slack: Send to Slack
+  uses: slackapi/slack-github-action@v2.1.1
 
 on:
   push:
