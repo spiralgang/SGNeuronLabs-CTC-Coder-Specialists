@@ -1,0 +1,54 @@
+Maintainers: Oracle Linux Product Team <ol-ovm-info_ww@oracle.com> (@Oracle)
+GitRepo: https://github.com/oracle/container-images.git
+GitCommit: 5c8a1c296acd6e90487cd261d16cf85fd6bcb73f
+GitFetch: refs/heads/master
+# https://github.com/oracle/container-images/tree/dist-amd64
+amd64-GitFetch: refs/heads/dist-amd64
+amd64-GitCommit: 84e7de0a91a548c336ae3e8b1e37dd432ba58ba7
+# https://github.com/oracle/container-images/tree/dist-arm64v8
+arm64v8-GitFetch: refs/heads/dist-arm64v8
+arm64v8-GitCommit: e9fbf6fde9b711f78fcd14dbb4c15e6783ef961f
+
+Tags: 10
+Architectures: amd64, arm64v8
+Directory: 10
+
+Tags: 10-slim
+Architectures: amd64, arm64v8
+Directory: 10-slim
+
+Tags: 9
+Architectures: amd64, arm64v8
+Directory: 9
+
+Tags: 9-slim
+Architectures: amd64, arm64v8
+Directory: 9-slim
+
+Tags: 9-slim-fips
+Architectures: amd64, arm64v8
+Directory: 9-slim-fips
+
+Tags: 8.10, 8
+Architectures: amd64, arm64v8
+Directory: 8
+
+Tags: 8-slim
+Architectures: amd64, arm64v8
+Directory: 8-slim
+
+Tags: 8-slim-fips
+Architectures: amd64, arm64v8
+Directory: 8-slim-fips
+
+Tags: 7.9, 7
+Architectures: amd64, arm64v8
+Directory: 7
+
+Tags: 7-slim
+Architectures: amd64, arm64v8
+Directory: 7-slim
+
+Tags: 7-slim-fips
+Architectures: amd64, arm64v8
+Directory: 7-slim-fips
