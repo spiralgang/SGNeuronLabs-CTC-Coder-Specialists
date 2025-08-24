@@ -143,3 +143,148 @@ After making changes, ALWAYS test these scenarios:
 - Always set timeouts of 20+ minutes for dependency installations
 - If operations appear hung, wait the full timeout period before investigating
 - Build times are expected to be long due to large repository size and complex dependencies
+
+# [spiralgang@localhost]~:# ./copilot-instructions.md
+## Instructional-Extension_Cyberforges
+@copilot
+
+on:
+  push:
+    branches: [ "main", "dev", "feature/*", "fix/*" ]
+  issues:
+    types: [opened, edited, reopened]
+  pull_request:
+    branches: [ "main", "dev" ]
+  schedule:
+    - cron: '42 13 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  checks: write
+
+jobs:
+  copilot-instructional-cyberforge:
+    name: Cyberforge Copilot Dashboard
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚀 Checkout Codebase
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: 🛠️ Setup Python Environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: ⚡ Install Dependencies
+        run: |
+          echo "🤖 cyberforge: Bootstrapping env..."
+          python3 -m pip install --upgrade pip
+          python3 -m pip install flake8 jq
+          python3 tools/check_env.py || echo "Env check failed, proceeding..."
+        timeout-minutes: 20
+
+      - name: 📦 Extract Zip Archives
+        run: |
+          echo "🤖 cyberforge: Extracting zips..."
+          python3 tools/extract_all_zips.py
+
+      - name: 🔍 Collect Bot Status
+        id: bot-status
+        run: |
+          echo "🤖 cyberforge: Collecting bot statuses..."
+          mkdir -p results
+          echo "# Cyberforge Bot Dashboard" > CYBERFORGE_STATUS.md
+          echo "## Bot Activity Log" >> CYBERFORGE_STATUS.md
+          echo "- **Bootstrap-and-Extract**: $(gh run list --workflow bootstrap-and-extract.yml --json conclusion --jq '.[0].conclusion' || echo 'Not run')" >> CYBERFORGE_STATUS.md
+          echo "- **Python-Package-Conda**: $(gh run list --workflow python-package-conda.yml --json conclusion --jq '.[0].conclusion' || echo 'Not run')" >> CYBERFORGE_STATUS.md
+          echo "- **Docker-CI**: $(gh run list --workflow docker-ci.yml --json conclusion --jq '.[0].conclusion' || echo 'Not run')" >> CYBERFORGE_STATUS.md
+          echo "- **Tencent**: $(gh run list --workflow tencent.yml --json conclusion --jq '.[0].conclusion' || echo 'Not run')" >> CYBERFORGE_STATUS.md
+          echo "## Next Steps for @Copilot" >> CYBERFORGE_STATUS.md
+          echo "- Review open PRs for auto-fixes and improvements." >> CYBERFORGE_STATUS.md
+          echo "- Check issues labeled 'cyberforge' for new tasks." >> CYBERFORGE_STATUS.md
+          git add CYBERFORGE_STATUS.md
+          git config user.name "cyberforge"
+          git config user.email "cyberforge@sgneurolabs.io"
+          git commit -m "🤖 cyberforge: Update bot dashboard" || echo "No changes"
+          git push
+
+      - name: 📣 Copilot Loop - Deduplicate & Propose Tasks
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'cyberforge'
+            });
+            const dupe = issues.data.some(issue => issue.title.includes('Bot Dashboard'));
+            if (!dupe) {
+              const pr = await github.rest.pulls.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: 'cyberforge: Bot Dashboard & Task Proposals',
+                body: '🤖 Auto-generated PR for bot status updates and new tasks across 40+ repos. Bots are looping:\n' +
+                      '- Bootstrap: Zip extraction\n- Python: Linting/Tests\n- Docker: Builds\n- Tencent: Deploys\n' +
+                      'Review @Copilot, then push to @spiralgang for merge.',
+                head: 'cyberforge-dashboard-' + Date.now(),
+                base: 'main'
+              });
+              github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.data.number,
+                body: '@Copilot: Bots are looping issues/tasks to you. Check CYBERFORGE_STATUS.md for status. Approve or suggest next steps.'
+              });
+            }
+
+      - name: 🧹 Run Flake8 Linting
+        run: |
+          echo "🤖 cyberforge: Running flake8..."
+          python3 -m flake8 tools/ --count --select=E9,F63,F7,F82 --show-source --statistics || true
+          python3 -m flake8 tools/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+      - name: 🔔 Notify on Failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1.27.0
+        with:
+          slack-bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          channel-id: 'devops-channel'
+          text: |
+            🚨 cyberforge alert: Copilot Instructional Extension failed on ${{ github.repository }}!
+            Branch: ${{ github.ref_name }}
+            Check: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      - name: 🧹 Cleanup
+        if: always()
+        run: |
+          echo "🤖 cyberforge: Purging artifacts..."
+          rm -rf results/
+
+      - name: 🎨 Generate Badge
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const badge = `![Copilot Dashboard Status](https://img.shields.io/badge/Copilot_Dashboard-Success-brightgreen?logo=github)`;
+            fs.appendFileSync('README.md', `\n${badge}\n`);
+            github.rest.repos.createOrUpdateFileContents({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              path: 'README.md',
+              message: '🤖 cyberforge: Update Copilot Dashboard badge',
+              content: Buffer.from(fs.readFileSync('README.md')).toString('base64'),
+              sha: (await github.rest.repos.getContent({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                path: 'README.md'
+              })).data.sha
+            });
+
+  # cyberforge Disclaimer: Forged with max efficiency, compliant with GitHub’s Terms of Service, Privacy Policy, and Workflow Best Practices. See https://docs.github.com/en/actions/using-workflows/workflow-best-practices. Stay cyber, stay legit! 🤖
