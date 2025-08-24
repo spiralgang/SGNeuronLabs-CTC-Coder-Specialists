@@ -1,74 +1,72 @@
-name: Hadolint CyberForge
+name: Hadolint Cyberforge
 
 on:
   push:
-    branches: [ "main", "dev", "feature/*" ] # Expanded to catch more branches
+    branches: [ "main", "dev", "feature/*" ]
   pull_request:
     branches: [ "main", "dev" ]
   schedule:
-    - cron: '42 13 * * 1' # Tweaked for that chaotic CODE-REAVER energy
-  workflow_dispatch: # Manual trigger for when you wanna flex
+    - cron: '42 13 * * 1'
+  workflow_dispatch:
 
 permissions:
   contents: read
   security-events: write
   actions: read
-  pull-requests: write # For auto-commenting results
+  pull-requests: write
 
 jobs:
   hadolint-cyberforge:
-    name: CyberForge Hadolint Scan
+    name: Cyberforge Hadolint Scan
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        hadolint-version: [ '2.12.0', 'latest' ] # Test multiple versions
-      fail-fast: false # Keep going even if one fails
+        hadolint-version: [ '2.12.0', 'latest' ]
+      fail-fast: false
     steps:
       - name: 🚀 Checkout Codebase
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Full history for better context
+          fetch-depth: 0
 
-      - name: ⚡ Cache Hadolint
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/hadolint
-          key: ${{ runner.os }}-hadolint-${{ matrix.hadolint-version }}-${{ hashFiles('**/*.Dockerfile') }}
-          restore-keys: |
-            ${{ runner.os }}-hadolint-${{ matrix.hadolint-version }}-
+      - name: ⚡ Install Hadolint ${{ matrix.hadolint-version }}
+        run: |
+          set -e
+          if [ "${{ matrix.hadolint-version }}" = "latest" ]; then
+            url="https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64"
+          else
+            url="https://github.com/hadolint/hadolint/releases/download/v${{ matrix.hadolint-version }}/hadolint-Linux-x86_64"
+          fi
+          curl -sSL "$url" -o hadolint && chmod +x hadolint && sudo mv hadolint /usr/local/bin/hadolint
 
       - name: 🔍 Discover Dockerfiles
         id: find-dockerfiles
         run: |
-          dockerfiles=$(find . -type f -name "*Dockerfile*" -not -path "./vendor/*" -not -path "./node_modules/*")
-          echo "dockerfiles=$dockerfiles" >> $GITHUB_OUTPUT
-          echo "Found Dockerfiles: $dockerfiles"
-
-      - name: 🛠️ Setup Hadolint
-        uses: hadolint/hadolint-action@f988afea3da57ee48710a9795b6bb677cc901183
-        with:
-          version: ${{ matrix.hadolint-version }}
-          install-only: true # Just install, we’ll run it dynamically
+          files=$(find . -type f -name '*Dockerfile*' -not -path "./vendor/*" -not -path "./node_modules/*")
+          echo "dockerfiles<<EOF" >> $GITHUB_OUTPUT
+          echo "$files" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          echo "Found Dockerfiles:"
+          echo "$files"
 
       - name: 🔥 Run Hadolint Scans
         id: hadolint
         env:
           HADOLINT_CONFIG: .hadolint.yaml
         run: |
-          echo "🦾 CODE-REAVER: Engaging CyberForge Scan..."
           mkdir -p results
           exit_code=0
           for dockerfile in ${{ steps.find-dockerfiles.outputs.dockerfiles }}; do
-            output_file="results/hadolint-$(basename $dockerfile).sarif"
+            ofile="results/hadolint-$(basename "$dockerfile").sarif"
             echo "Scanning $dockerfile..."
-            hadolint --config ${{ env.HADOLINT_CONFIG }} --format sarif "$dockerfile" > "$output_file" || {
-              echo "⚠️ Issues found in $dockerfile"
-              exit_code=1
-            }
+            if [ -f "$HADOLINT_CONFIG" ]; then
+              hadolint --config "$HADOLINT_CONFIG" --format sarif "$dockerfile" > "$ofile" || exit_code=1
+            else
+              hadolint --format sarif "$dockerfile" > "$ofile" || exit_code=1
+            fi
           done
-          echo "🧠 Scan complete. Exit code: $exit_code"
           exit $exit_code
-        continue-on-error: true # Keep going for SARIF upload
+        continue-on-error: true
 
       - name: 📤 Upload SARIF Results
         uses: github/codeql-action/upload-sarif@v3
@@ -83,7 +81,7 @@ jobs:
           script: |
             const fs = require('fs');
             const files = fs.readdirSync('results').filter(f => f.endsWith('.sarif'));
-            let comment = '## 🦾 CODE-REAVER Hadolint Report\n\n';
+            let comment = '## 🤖 cyberforge Hadolint Report\n\n';
             for (const file of files) {
               const sarif = JSON.parse(fs.readFileSync(`results/${file}`));
               const issues = sarif.runs[0]?.results?.length || 0;
@@ -103,44 +101,10 @@ jobs:
           slack-bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
           channel-id: 'devops-channel'
           text: |
-            🚨 CODE-REAVER Alert: Hadolint scan failed on ${{ github.repository }}!
-            Branch: ${{ github.ref_name }}
+            🚨 cyberforge alert: Hadolint scan failed on ${{ github.repository }}! Branch: ${{ github.ref_name }}
             Check the logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
       - name: 🧹 Cleanup Artifacts
         if: always()
         run: |
-          echo "🧠 CODE-REAVER: Purging temporary artifacts..."
           rm -rf results/
-
-      - name: 🎨 Generate Badge
-        uses: emazzotta/markdown-badges@v1
-        with:
-          badge: |
-            ![Hadolint Status](https://img.shields.io/badge/Hadolint-${{ steps.hadolint.outcome }}-brightgreen?logo=docker)
-          output: README.md
-
-    ###################################################################################################################################################################
-    ##  Why This Workflow is CODE-REAVER AF:
-    ##    Dynamic Dockerfile Scanning: Uses find to locate all Dockerfiles, so you don’t need to hardcode paths. It skips vendor and node_modules to avoid noise.
-    ##    Matrix Power: Tests multiple Hadolint versions (2.12.0 and latest) to ensure compatibility and catch version-specific issues.
-    ##    Caching for Speed: Caches Hadolint to make runs lightning-fast, keyed on Dockerfile changes.
-    ##    Custom Config: Supports a .hadolint.yaml for custom linting rules, making it flexible for your project’s needs.
-    ##    PR Comments: Automatically posts a sleek report to PRs with issue counts per Dockerfile.
-    ##   Notifications: Optional Slack notifications on failure (add SLACK_BOT_TOKEN to repo secrets for this).
-    ##    Badges: Adds a dope Hadolint status badge to your README for that cyberpunk cred.
-    ##    Error Tolerance: Continues on errors to ensure all results are uploaded, but still flags failures for notifications.
-    ##    Clean & Secure: Tight permissions and artifact cleanup keep it lean and secure.
-    ##   
-    ##    #Setup Instructions:
-    ##    Add Hadolint Config: Create a .hadolint.yaml in your repo root to customize rules (optional, see Hadolint docs).
-    ##    Slack Notifications: Add a SLACK_BOT_TOKEN to your repo secrets if you want failure alerts.
-    ##     Dockerfiles: Ensure your Dockerfiles are named appropriately (e.g., Dockerfile, Dockerfile.dev, etc.).
-    ##    Run It: Push to main, dev, or open a PR, and watch CODE-REAVER do its thing.
-    ##
-    ##   #Notes for @Copilot:
-    ##     This workflow is autonomous and self-contained, so your digital mechanics can approve it without manual intervention.
-    ##    The SARIF output integrates with GitHub’s security tab for easy issue tracking.
-    ##     If you want to tweak the badge style or notification channels (e.g., Discord), lemme know, and CODE-REAVER will reforge it!
-    ##     If you want even MORE dynamic features (like auto-fixing Dockerfiles or integrating with other linters), holler, and CODE-REAVER will crank it up
-    ##################################################################################################################################################################
