@@ -1,4 +1,5 @@
-name: Hadolint Cyberforge
+- name: Hadolint Action
+  uses: hadolint/hadolint-action@v3.1.0
 
 on:
   push:
