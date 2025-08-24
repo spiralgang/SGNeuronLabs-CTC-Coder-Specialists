@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   bootstrap-extract-cyberforge:
-    name: Cyberforge Zip Extractor
+    name: Cyberforge Extractor
     runs-on: ubuntu-latest
     steps:
       - name: 🚀 Checkout Codebase
