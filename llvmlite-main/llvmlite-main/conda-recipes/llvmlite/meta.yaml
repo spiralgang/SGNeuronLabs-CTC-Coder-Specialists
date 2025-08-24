@@ -1,0 +1,52 @@
+{% set VERSION_SUFFIX = "" %} # debug version suffix, appended to the version
+
+package:
+  name: llvmlite
+  # GIT_DESCRIBE_TAG may not be set
+  version: {{ "%s%s" % (environ.get('GIT_DESCRIBE_TAG', '').lstrip('v'), VERSION_SUFFIX) }}
+
+source:
+  # Using the local source tree helps test building without pushing changes
+  path: ../..
+
+build:
+  number: {{ environ.get('GIT_DESCRIBE_NUMBER', 0) }}
+  script_env:
+    - PY_VCRUNTIME_REDIST
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - vs2022_{{ target_platform  }}    # [win]
+    - cmake
+    - make           # [unix]
+  host:
+    - python
+    - setuptools
+    # On channel https://anaconda.org/numba/
+    - llvmdev 15.*
+    - vs2015_runtime # [win]
+    # llvmdev is built with libz compression support
+    - zlib           # [unix]
+    # requires libxml2
+    - libxml2        # [win]
+  run:
+    - python >=3.10
+    - vs2015_runtime # [win]
+    # osx has dynamically linked libstdc++
+    - libcxx >=4.0.1 # [osx]
+    - zlib
+    - zstd
+
+test:
+  requires:
+    - py-lief
+  imports:
+    - llvmlite
+    - llvmlite.binding
+
+about:
+  home: https://github.com/numba/llvmlite
+  license: New BSD License
+  summary: A lightweight LLVM python binding for writing JIT compilers

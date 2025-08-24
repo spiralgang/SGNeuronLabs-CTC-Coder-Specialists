@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  github-agent:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - GITHUB_APP_ID=${GITHUB_APP_ID}
+      - GITHUB_PRIVATE_KEY=${GITHUB_PRIVATE_KEY}
+      - GITHUB_WEBHOOK_SECRET=${GITHUB_WEBHOOK_SECRET}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+    volumes:
+      - api-keys:/app/.api-keys
+      - github-models:/app/.github/models
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  api-keys:
+    driver: local
+  github-models:
+    driver: local
