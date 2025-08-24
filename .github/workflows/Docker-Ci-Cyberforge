@@ -1,4 +1,4 @@
-name: Dockerfile Ci-Cyberforge
+name: Docker-Ci-Cyberforge
 
 on:
   push:
