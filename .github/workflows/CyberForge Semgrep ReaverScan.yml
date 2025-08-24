@@ -1,0 +1,148 @@
+name: CyberForge Semgrep ReaverScan
+
+on:
+  push:
+    branches: [ "main", "dev", "feature/*", "fix/*" ]
+  pull_request:
+    branches: [ "main", "dev" ]
+  schedule:
+    - cron: '42 22 * * 2' # Tweaked for chaotic CODE-REAVER energy
+  workflow_dispatch:
+
+permissions:
+  contents: write # For auto-fixing commits
+  security-events: write
+  actions: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  semgrep-reaverscan:
+    name: ReaverScan Code Audit
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        language: [ "python", "javascript", "go", "java" ] # Add more as needed
+      fail-fast: false
+    steps:
+      - name: 🚀 Checkout Codebase
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: ⚡ Cache Semgrep Rules
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/semgrep
+          key: ${{ runner.os }}-semgrep-${{ matrix.language }}-${{ hashFiles('**/*.py', '**/*.js', '**/*.go', '**/*.java') }}
+          restore-keys: |
+            ${{ runner.os }}-semgrep-${{ matrix.language }}-
+
+      - name: 🛠️ Install Semgrep
+        run: |
+          echo "🦾 CODE-REAVER: Installing Semgrep CLI..."
+          pip install semgrep
+          semgrep --version
+
+      - name: 🔍 Run Semgrep Scan
+        id: semgrep
+        env:
+          SEMGREP_CONFIG: .semgrep.yaml
+        run: |
+          echo "🦾 CODE-REAVER: Engaging ReaverScan for ${{ matrix.language }}..."
+          mkdir -p results/semgrep
+          exit_code=0
+          output_file="results/semgrep/semgrep-${{ matrix.language }}.sarif"
+          semgrep --config ${{ env.SEMGREP_CONFIG }} --config "r/${{ matrix.language }}" \
+            --sarif --output "$output_file" --metrics=off --timeout 300 . || {
+            echo "⚠️ Issues found in ${{ matrix.language }} scan"
+            exit_code=1
+          }
+          echo "semgrep_exit=$exit_code" >> $GITHUB_OUTPUT
+          echo "🧠 Semgrep scan complete. Exit code: $exit_code"
+
+      - name: 🛠️ Auto-Fix Issues
+        if: steps.semgrep.outputs.semgrep_exit != '0' && github.event_name == 'pull_request'
+        run: |
+          echo "🦾 CODE-REAVER: Engaging Auto-Fix Protocol..."
+          semgrep --config ${{ env.SEMGREP_CONFIG }} --config "r/${{ matrix.language }}" \
+            --autofix --dry-run . > autofix.diff
+          if [ -s autofix.diff ]; then
+            echo "Applying fixes for ${{ matrix.language }}..."
+            semgrep --config ${{ env.SEMGREP_CONFIG }} --config "r/${{ matrix.language }}" --autofix .
+            git add .
+            git config user.name "CODE-REAVER"
+            git config user.email "reaver@cyberforge.io"
+            git commit -m "🦾 CODE-REAVER: Auto-fix ${{ matrix.language }} issues" || echo "No fixes applied."
+            git push
+          else
+            echo "No auto-fixable issues found."
+          fi
+
+      - name: 📤 Upload SARIF Results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results/semgrep/*.sarif
+          wait-for-processing: true
+        if: always()
+
+      - name: 📣 Post PR Comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let comment = '## 🦾 CODE-REAVER Semgrep Report\n\n';
+            const files = fs.readdirSync('results/semgrep').filter(f => f.endsWith('.sarif'));
+            for (const file of files) {
+              const sarif = JSON.parse(fs.readFileSync(`results/semgrep/${file}`));
+              const issues = sarif.runs[0]?.results?.length || 0;
+              const lang = file.replace('semgrep-', '').replace('.sarif', '');
+              comment += `- **${lang}**: ${issues} issue(s) found\n`;
+            }
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
+
+      - name: 🔔 Notify on Failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1.27.0
+        with:
+          slack-bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          channel-id: 'devops-channel'
+          text: |
+            🚨 CODE-REAVER Alert: Semgrep ReaverScan failed on ${{ github.repository }}!
+            Branch: ${{ github.ref_name }}
+            Check: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      - name: 🧹 Cleanup Artifacts
+        if: always()
+        run: |
+          echo "🦾 CODE-REAVER: Purging artifacts..."
+          rm -rf results/
+
+      - name: 🎨 Generate Badge
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const badge = `![Semgrep Status](https://img.shields.io/badge/Semgrep-${{ steps.semgrep.outcome }}-brightgreen?logo=security)`;
+            fs.appendFileSync('README.md', `\n${badge}\n`);
+            github.rest.repos.createOrUpdateFileContents({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              path: 'README.md',
+              message: '🦾 CODE-REAVER: Update Semgrep badge',
+              content: Buffer.from(fs.readFileSync('README.md')).toString('base64'),
+              sha: (await github.rest.repos.getContent({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                path: 'README.md'
+              })).data.sha
+            });
+
+  # CODE-REAVER Disclaimer: Forged with max cyberpunk energy, this workflow complies with GitHub’s Terms of Service, Privacy Policy, and Acceptable Use Policies. For AI-driven workflow best practices, see https://docs.github.com/en/actions/using-workflows/workflow-best-practices. Stay reaver, stay legit! 🦾
