@@ -1,0 +1,9 @@
+Maintainers: Daniel Ortiz <dortiz@krakend.io> (@taik0),
+             Daniel López <dlopez@krakend.io> (@kpacha)
+GitRepo: https://github.com/krakendio/docker-library.git
+
+# Alpine images
+Tags: 2.10.2, 2.10, 2, latest
+Architectures: amd64, arm64v8
+GitCommit: 3017b6a9345534b54243c35b76f865121e8d50bf
+Directory: 2.10.2
