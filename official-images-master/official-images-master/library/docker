@@ -1,0 +1,37 @@
+# this file is generated via https://github.com/docker-library/docker/blob/9f57f3fb1ef688e231b911e0b414da241804c511/generate-stackbrew-library.sh
+
+Maintainers: Tianon Gravi <tianon@dockerproject.org> (@tianon),
+             Joseph Ferguson <yosifkit@gmail.com> (@yosifkit)
+GitRepo: https://github.com/docker-library/docker.git
+Builder: buildkit
+
+Tags: 28.3.3-cli, 28.3-cli, 28-cli, cli, 28.3.3-cli-alpine3.22
+Architectures: amd64, arm32v6, arm32v7, arm64v8
+GitCommit: 7d789f6d3ca9d6cef6c7cbcbbefbd6483ee3d2cd
+Directory: 28/cli
+
+Tags: 28.3.3-dind, 28.3-dind, 28-dind, dind, 28.3.3-dind-alpine3.22, 28.3.3, 28.3, 28, latest, 28.3.3-alpine3.22
+Architectures: amd64, arm32v6, arm32v7, arm64v8
+GitCommit: 7d789f6d3ca9d6cef6c7cbcbbefbd6483ee3d2cd
+Directory: 28/dind
+
+Tags: 28.3.3-dind-rootless, 28.3-dind-rootless, 28-dind-rootless, dind-rootless
+Architectures: amd64, arm64v8
+GitCommit: 7d789f6d3ca9d6cef6c7cbcbbefbd6483ee3d2cd
+Directory: 28/dind-rootless
+
+Tags: 28.3.3-windowsservercore-ltsc2025, 28.3-windowsservercore-ltsc2025, 28-windowsservercore-ltsc2025, windowsservercore-ltsc2025
+SharedTags: 28.3.3-windowsservercore, 28.3-windowsservercore, 28-windowsservercore, windowsservercore
+Architectures: windows-amd64
+GitCommit: 7d789f6d3ca9d6cef6c7cbcbbefbd6483ee3d2cd
+Directory: 28/windows/windowsservercore-ltsc2025
+Constraints: windowsservercore-ltsc2025
+Builder: classic
+
+Tags: 28.3.3-windowsservercore-ltsc2022, 28.3-windowsservercore-ltsc2022, 28-windowsservercore-ltsc2022, windowsservercore-ltsc2022
+SharedTags: 28.3.3-windowsservercore, 28.3-windowsservercore, 28-windowsservercore, windowsservercore
+Architectures: windows-amd64
+GitCommit: 7d789f6d3ca9d6cef6c7cbcbbefbd6483ee3d2cd
+Directory: 28/windows/windowsservercore-ltsc2022
+Constraints: windowsservercore-ltsc2022
+Builder: classic

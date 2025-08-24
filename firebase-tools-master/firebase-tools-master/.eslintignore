@@ -1,0 +1,7 @@
+coverage
+dev
+lib
+node_modules
+standalone
+templates
+.firebase

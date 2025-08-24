@@ -1,0 +1,25 @@
+{
+  "name": "enhanced-git-chat-bot",
+  "version": "1.0.0",
+  "description": "An advanced GitHub chat bot with sophisticated command parsing, external integrations, and ML capabilities",
+  "main": "enhanced-git-chat-bot.js",
+  "scripts": {
+    "start": "node enhanced-git-chat-bot.js",
+    "dev": "nodemon enhanced-git-chat-bot.js",
+    "setup": "node setup.js"
+  },
+  "dependencies": {
+    "@octokit/app": "^13.1.2",
+    "@octokit/webhooks": "^10.9.1",
+    "axios": "^1.4.0",
+    "cheerio": "^1.0.0-rc.12",
+    "dotenv": "^16.3.1",
+    "ml-classify-text": "^2.0.0",
+    "natural": "^6.5.0",
+    "nodemon": "^2.0.22"
+  },
+  "engines": {
+    "node": ">=14"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,17 @@
+Maintainers: Lucien Volmar <lucien@aerospike.com> (@volmarl),
+             Michael Coberly <mcoberly@aerospike.com> (@mcoberly2),
+             Phuc Vinh <pvinh@aerospike.com> (@pvinh-spike),
+             Kevin Porter <kporter@aerospike.com> (@kportertx),
+             Thomas Huelbert <thuelbert@aerospike.com> (@thomasaerospike)
+
+Tags: ee-8.1.0.0, ee-8.1.0.0_1
+Architectures: amd64, arm64v8
+GitRepo: https://github.com/aerospike/aerospike-server.docker.git
+GitCommit: d2d1e58437ea00ef3811529920a1cbfc0018a751
+Directory: enterprise/ubuntu24.04
+
+Tags: ce-8.1.0.0, ce-8.1.0.0_1
+Architectures: amd64, arm64v8
+GitRepo: https://github.com/aerospike/aerospike-server.docker.git
+GitCommit: d2d1e58437ea00ef3811529920a1cbfc0018a751
+Directory: community/ubuntu24.04

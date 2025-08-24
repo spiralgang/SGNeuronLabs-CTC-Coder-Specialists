@@ -1,0 +1,17 @@
+*.pyc
+*.pyd
+*.o
+*.so
+*.dylib
+*.dll
+build/
+dist/
+*.egg-info
+ffi/build/
+htmlcov/
+.coverage
+coverage.xml
+MANIFEST
+docs/_build/
+docs/gh-pages/
+.*.swp
