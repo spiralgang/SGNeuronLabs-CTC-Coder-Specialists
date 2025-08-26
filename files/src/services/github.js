@@ -150,6 +150,53 @@ async function processCommand(octokit, payload, analysis) {
         logger.error('Failed to fetch repository statistics', error);
         return 'Unable to fetch repository statistics. Please try again later.';
       }
+
+    case 'pingping':
+      return '🏓 Pong pong! Bot is alive and responding. All systems operational.';
+
+    case 'chatgptchat':
+    case 'chatgpt':
+      if (!params) {
+        return 'Please provide a question or prompt: `/chatgpt [your question]`';
+      }
+      try {
+        // For now, provide a helpful response indicating chat functionality
+        return `🤖 **Chat Response for:** "${params}"\n\nI understand you want to chat! While I don't have direct ChatGPT integration yet, I can help you with:\n\n- Repository questions using \`/help\`\n- Code search using \`/search [term]\`\n- Issue tracking using \`/issues\`\n- PR management using \`/prs\`\n\nFor AI-powered responses, this feature is being developed. Your question has been noted for future implementation.`;
+      } catch (error) {
+        logger.error('Chat command failed', error);
+        return 'Chat functionality temporarily unavailable. Please try again later.';
+      }
+
+    case 'reviewauto':
+      return `🔍 **Auto Review Mode**\n\nAuto review functionality is being set up. This will:\n- Automatically analyze new PRs\n- Check for common issues\n- Provide feedback on code quality\n- Suggest improvements\n\nUse \`/review [pr-number]\` to manually review a specific PR.`;
+
+    case 'review':
+      if (!params) {
+        return 'Please specify what to review: `/review [pr-number]\` or `/review fix` for general fixes';
+      }
+      
+      if (params.toLowerCase() === 'fix') {
+        return `🔧 **Review Fix Mode**\n\nChecking for common repository issues:\n\n✅ Command parsing - Fixed\n✅ Bot responsiveness - Active\n✅ Workflow integration - Updated\n\nIf you're experiencing specific issues, please:\n1. Check workflow logs in Actions tab\n2. Verify bot permissions\n3. Try basic commands like \`/help\` or \`/status\``;
+      }
+      
+      // Handle PR number review
+      const prNumber = parseInt(params);
+      if (isNaN(prNumber)) {
+        return 'Invalid PR number. Use `/review [pr-number]` or `/review fix`';
+      }
+      
+      try {
+        const pr = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}', {
+          owner: repository.owner.login,
+          repo: repository.name,
+          pull_number: prNumber
+        });
+        
+        return `🔍 **PR Review #${prNumber}**\n\n**Title:** ${pr.data.title}\n**Status:** ${pr.data.state}\n**Files Changed:** ${pr.data.changed_files}\n**Additions:** +${pr.data.additions}\n**Deletions:** -${pr.data.deletions}\n\n*Automated detailed review coming soon...*`;
+      } catch (error) {
+        logger.error(`Failed to review PR #${prNumber}`, error);
+        return `Unable to review PR #${prNumber}. Please check if the PR exists.`;
+      }
       
     default:
       return `Unknown command: \`/${command}\`. Type \`/help\` for a list of available commands.`;

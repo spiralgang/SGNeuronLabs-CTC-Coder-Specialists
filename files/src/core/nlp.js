@@ -6,7 +6,7 @@
 const logger = require('../utils/logger');
 
 // Command patterns
-const COMMAND_REGEX = /^\/(help|status|search|issues|prs|stats)(?:\s+(.+))?$/i;
+const COMMAND_REGEX = /^\/(help|status|search|issues|prs|stats|pingping|chatgptchat|chatgpt|reviewauto|review)(?:\s+(.+))?$/i;
 
 // Intent recognition patterns
 const INTENT_PATTERNS = [
