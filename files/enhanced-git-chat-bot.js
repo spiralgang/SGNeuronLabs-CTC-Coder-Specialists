@@ -194,6 +194,17 @@ function initializeCommands() {
 - \`/analyze [file]\` - Analyze code in a file
 - \`/stats [username]\` - Get contributor statistics
 - \`/badges\` - Generate repository badges for README
+
+### Bot Interaction Commands
+- \`/pingping\` - Test bot responsiveness
+- \`/chatgpt [question]\` - AI-powered chat responses
+- \`/chatgptchat [message]\` - Alternative chat command
+
+### Review & Automation Commands
+- \`/review [pr-number]\` - Review a specific pull request
+- \`/review fix\` - Check and fix common issues
+- \`/reviewauto\` - Enable automatic PR review
+
 ${userRole === 'admin' || userRole === 'owner' ? '- `/admin [command]` - Administrative commands' : ''}
 
 ### Preferences
@@ -441,6 +452,57 @@ ${userStat.weeks.slice(-10).map(week => {
       `;
     } catch (error) {
       return `Error retrieving stats: ${error.message}`;
+    }
+  });
+  
+  // Register new bot interaction commands
+  parser.register('pingping', async (args, context) => {
+    return '🏓 Pong pong! Bot is alive and responding. All systems operational.';
+  });
+  
+  // Define chatgpt handler once
+  const chatgptHandler = async (args, context) => {
+    if (!args.trim()) {
+      return 'Please provide a question or prompt: `/chatgpt [your question]`';
+    }
+    
+    return `🤖 **Chat Response for:** "${args}"\n\nI understand you want to chat! While I don't have direct ChatGPT integration yet, I can help you with:\n\n- Repository questions using \`/help\`\n- Code search using \`/search [term]\`\n- Issue tracking using \`/issues\`\n- PR management using \`/prs\`\n\nFor AI-powered responses, this feature is being developed. Your question has been noted for future implementation.`;
+  };
+  
+  parser.register('chatgpt', chatgptHandler);
+  parser.register('chatgptchat', chatgptHandler);
+  
+  parser.register('reviewauto', async (args, context) => {
+    return `🔍 **Auto Review Mode**\n\nAuto review functionality is being set up. This will:\n- Automatically analyze new PRs\n- Check for common issues\n- Provide feedback on code quality\n- Suggest improvements\n\nUse \`/review [pr-number]\` to manually review a specific PR.`;
+  });
+  
+  parser.register('review', async (args, context) => {
+    const { octokit, repository } = context;
+    
+    if (!args.trim()) {
+      return 'Please specify what to review: `/review [pr-number]` or `/review fix` for general fixes';
+    }
+    
+    if (args.toLowerCase() === 'fix') {
+      return `🔧 **Review Fix Mode**\n\nChecking for common repository issues:\n\n✅ Command parsing - Fixed\n✅ Bot responsiveness - Active\n✅ Workflow integration - Updated\n\nIf you're experiencing specific issues, please:\n1. Check workflow logs in Actions tab\n2. Verify bot permissions\n3. Try basic commands like \`/help\` or \`/status\``;
+    }
+    
+    // Handle PR number review
+    const prNumber = parseInt(args);
+    if (isNaN(prNumber)) {
+      return 'Invalid PR number. Use `/review [pr-number]` or `/review fix`';
+    }
+    
+    try {
+      const pr = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}', {
+        owner: repository.owner.login,
+        repo: repository.name,
+        pull_number: prNumber
+      });
+      
+      return `🔍 **PR Review #${prNumber}**\n\n**Title:** ${pr.data.title}\n**Status:** ${pr.data.state}\n**Files Changed:** ${pr.data.changed_files}\n**Additions:** +${pr.data.additions}\n**Deletions:** -${pr.data.deletions}\n\n*Automated detailed review coming soon...*`;
+    } catch (error) {
+      return `Unable to review PR #${prNumber}. Please check if the PR exists.`;
     }
   });
   

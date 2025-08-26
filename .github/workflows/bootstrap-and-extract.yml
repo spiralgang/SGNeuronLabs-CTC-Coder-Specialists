@@ -56,11 +56,18 @@ jobs:
         run: |
           echo "🤖 cyberforge: Extracting zips..."
           python3 tools/extract_all_zips.py
-          git add .
-          git config user.name "cyberforge"
-          git config user.email "cyberforge@sgneurolabs.io"
-          git commit -m "🤖 cyberforge: Auto-extract zips" || echo "No changes"
-          git push
+          
+          # Only attempt git operations on main branch push events
+          if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "📋 Committing extracted files to main branch"
+            git add .
+            git config user.name "cyberforge"
+            git config user.email "cyberforge@sgneurolabs.io"
+            git commit -m "🤖 cyberforge: Auto-extract zips" || echo "No changes to commit"
+            git push || echo "⚠️ Git push failed (may be normal for forks/PRs)"
+          else
+            echo "📋 Skipping git commit (not main branch push)"
+          fi
 
       - name: 🛠️ Auto-Fix Extraction Issues
         if: failure() && steps.extract.outcome == 'failure'
@@ -98,15 +105,16 @@ jobs:
             }
 
       - name: 🔔 Notify on Failure
-        if: failure()
+        if: failure() && secrets.SLACK_BOT_TOKEN != null
         uses: slackapi/slack-github-action@v1.27.0
         with:
-          slack-bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
           channel-id: 'devops-channel'
-          text: |
+          slack-message: |
             🚨 cyberforge alert: Zip extraction failed on ${{ github.repository }}!
             Branch: ${{ github.ref_name }}
             Check: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: 🧹 Cleanup
         if: always()

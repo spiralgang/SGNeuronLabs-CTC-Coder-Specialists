@@ -1,0 +1,39 @@
+# Semgrep configuration for SGNeuronLabs CTC Coder Specialists
+rules:
+  # Basic Python security rules
+  - id: python-hardcoded-secret
+    pattern: password = "..."
+    message: Potential hardcoded password
+    languages: [python]
+    severity: ERROR
+    
+  - id: python-eval-use
+    pattern: eval(...)
+    message: Avoid using eval() - security risk
+    languages: [python]
+    severity: WARNING
+    
+  # Basic JavaScript security rules  
+  - id: js-hardcoded-secret
+    pattern: password = "..."
+    message: Potential hardcoded password
+    languages: [javascript]
+    severity: ERROR
+    
+  - id: js-eval-use
+    pattern: eval(...)
+    message: Avoid using eval() - security risk
+    languages: [javascript]
+    severity: WARNING
+
+# Paths to exclude from scanning
+exclude:
+  - "*.zip"
+  - "node_modules/"
+  - "__pycache__/"
+  - "*.pyc"
+  - "dist/"
+  - "build/"
+  - ".git/"
+  - "*.min.js"
+  - "extracted-*/"

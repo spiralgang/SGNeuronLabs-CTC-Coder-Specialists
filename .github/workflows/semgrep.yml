@@ -68,8 +68,17 @@ jobs:
           mkdir -p results/semgrep
           exit_code=0
           output_file="results/semgrep/semgrep-${{ matrix.language }}.sarif"
-          semgrep --config ${{ env.SEMGREP_CONFIG }} --config "r/${{ matrix.language }}" \
-            --sarif --output "$output_file" --metrics=off --timeout 300 . || {
+          
+          # Check if config exists, fallback to registry rules
+          if [ -f "$SEMGREP_CONFIG" ]; then
+            echo "📋 Using local config: $SEMGREP_CONFIG"
+            config_args="--config $SEMGREP_CONFIG --config r/${{ matrix.language }}"
+          else
+            echo "📋 Using registry rules only"
+            config_args="--config r/${{ matrix.language }}"
+          fi
+          
+          semgrep $config_args --sarif --output "$output_file" --metrics=off --timeout 300 . || {
             echo "⚠️ Issues found in ${{ matrix.language }} scan"
             exit_code=1
           }
@@ -123,15 +132,16 @@ jobs:
             });
 
       - name: 🔔 Notify on Failure
-        if: failure()
+        if: failure() && secrets.SLACK_BOT_TOKEN != null
         uses: slackapi/slack-github-action@v1.27.0
         with:
-          slack-bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
           channel-id: 'devops-channel'
-          text: |
+          slack-message: |
             🚨 CODE-REAVER Alert: Semgrep ReaverScan failed on ${{ github.repository }}!
             Branch: ${{ github.ref_name }}
             Check: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: 🧹 Cleanup Artifacts
         if: always()

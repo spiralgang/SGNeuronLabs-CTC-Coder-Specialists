@@ -96,14 +96,15 @@ jobs:
             });
 
       - name: 🔔 Notify on Failure
-        if: failure()
+        if: failure() && secrets.SLACK_BOT_TOKEN != null
         uses: slackapi/slack-github-action@v1.27.0
         with:
-          slack-bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
           channel-id: 'devops-channel'
-          text: |
+          slack-message: |
             🚨 cyberforge alert: Hadolint scan failed on ${{ github.repository }}! Branch: ${{ github.ref_name }}
             Check the logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: 🧹 Cleanup Artifacts
         if: always()
