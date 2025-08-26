@@ -460,18 +460,17 @@ ${userStat.weeks.slice(-10).map(week => {
     return '🏓 Pong pong! Bot is alive and responding. All systems operational.';
   });
   
-  parser.register('chatgpt', async (args, context) => {
+  // Define chatgpt handler once
+  const chatgptHandler = async (args, context) => {
     if (!args.trim()) {
       return 'Please provide a question or prompt: `/chatgpt [your question]`';
     }
     
     return `🤖 **Chat Response for:** "${args}"\n\nI understand you want to chat! While I don't have direct ChatGPT integration yet, I can help you with:\n\n- Repository questions using \`/help\`\n- Code search using \`/search [term]\`\n- Issue tracking using \`/issues\`\n- PR management using \`/prs\`\n\nFor AI-powered responses, this feature is being developed. Your question has been noted for future implementation.`;
-  });
+  };
   
-  parser.register('chatgptchat', async (args, context) => {
-    // Alias for chatgpt command
-    return parser.process(`/chatgpt ${args}`, context);
-  });
+  parser.register('chatgpt', chatgptHandler);
+  parser.register('chatgptchat', chatgptHandler);
   
   parser.register('reviewauto', async (args, context) => {
     return `🔍 **Auto Review Mode**\n\nAuto review functionality is being set up. This will:\n- Automatically analyze new PRs\n- Check for common issues\n- Provide feedback on code quality\n- Suggest improvements\n\nUse \`/review [pr-number]\` to manually review a specific PR.`;
