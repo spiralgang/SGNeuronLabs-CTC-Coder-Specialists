@@ -186,11 +186,7 @@ async function processCommand(octokit, payload, analysis) {
       }
       
       try {
-        const pr = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}', {
-          owner: repository.owner.login,
-          repo: repository.name,
-          pull_number: prNumber
-        });
+        const pr = await fetchPullRequest(octokit, repository, prNumber);
         
         return `🔍 **PR Review #${prNumber}**\n\n**Title:** ${pr.data.title}\n**Status:** ${pr.data.state}\n**Files Changed:** ${pr.data.changed_files}\n**Additions:** +${pr.data.additions}\n**Deletions:** -${pr.data.deletions}\n\n*Automated detailed review coming soon...*`;
       } catch (error) {
